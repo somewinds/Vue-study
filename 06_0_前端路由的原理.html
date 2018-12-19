@@ -1,0 +1,124 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+	<style>
+		ul{
+			width: 300px;
+		}
+		li{
+			list-style: none;
+			float: left;
+			width: 30%;
+			background-color: blue;
+			border: 1px solid #000;
+			height: 100px;
+		}
+	</style>
+</head>
+<body>
+	<a href="#/login">登录</a>
+	<a href="#/register">注册</a>
+	<div id="d_header"></div>
+	<div id="app"></div>
+
+	<script type="text/javascript">
+		// hashchange 事件，url上的部分锚点数据（#xxx）改变，可以获取到这个事件
+		let d_header = document.getElementById('d_header');
+		window.addEventListener('hashchange', function(){
+			console.log(location.hash);
+			// 根据不同的锚点值做出不同的显示
+			switch(location.hash){
+				case '#/login': 
+					d_header.innerHTML = '<h1>登录页面</h1>';
+					break;
+				case '#/register': 
+					console.log(222)
+					console.log(d_header)
+					d_header.innerHTML = '<h1>注册页面</h1>';
+					break;
+				default:
+					break;
+			}
+		})
+
+
+		let MyBtn = {
+			template: `
+				<button>我是组件按钮</button>
+			`,
+			data(){
+				return {
+					text: 123,
+				}
+			},
+		}
+		// 在组件的DOM部分，任意标签中，写上 ref="xxx"
+		// 通过组件对象 this.$refs.xxx 获取元素实例
+		// 
+		// $属性：$refs 获取组件内的元素
+		// $parent：获取当前组件对象的父组件
+		// $children：获取子组件
+		// $root：获取new Vue的实例
+		// $el：获取组件对象的DOM元素
+		let App = {
+			components: {
+				MyBtn
+			},
+			template: `
+				<div>
+					<button ref="btn">我是按钮</button>
+					<input type="text" ref="input" v-if="isShow" />
+					<my-btn ref="myBtn"></my-btn>
+				</div>
+			`,
+			data(){
+				return {
+					isShow: false,
+				}
+			},
+			beforeCreate: function(){
+				// 这里还不能操作数据，只是初始化了事件等
+				// console.log(this.$refs['btn']);
+			},
+			created: function(){
+				// 可以操作数据了
+				// console.log(this.$refs['btn']);
+			},
+			beforeMount: function(){
+				// new Vue 发生装在，替换 <div id="app"> 之前
+				// console.log(this.$refs['btn']);
+			},
+			mounted: function(){
+				// 此处才能获取 this.$refs.xxx
+				// 装载数据后
+				// console.log(this.$refs['btn']);
+
+				console.log(this.$refs['myBtn'])
+				console.log(this.$refs['myBtn'].text)
+
+				// 显示input，并给予获取焦点
+				this.isShow = true;
+				// this.$refs['input'].focus(); // 无效，因为input并不会立马渲染出来
+				// 最终代码执行完毕后，vue才会根据实际的值，进行DOM的操作
+				// 也就是说 重复设置 isShow = true/false，只会在最后计算出最终结果，再执行一次渲染操作
+
+				// 我们希望在vue真正渲染DOM到页面以后，才做的事：
+				this.$nextTick(function(){
+					this.$refs['input'].focus();
+				});
+			},
+
+		}
+
+		new Vue({
+			el: '#app',
+			components: {
+				app: App
+			},
+			template: `<app/>`
+		})
+	</script>
+</body>
+</html>

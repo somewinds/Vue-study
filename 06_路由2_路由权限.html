@@ -1,0 +1,165 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+	<!-- 1.引入vue-router（核心插件）对象 -->
+	<script src="https://unpkg.com/vue-router@2.0.0/dist/vue-router.js"></script>
+	<style>
+		ul{
+			width: 300px;
+		}
+		li{
+			list-style: none;
+			float: left;
+			width: 30%;
+			background-color: blue;
+			border: 1px solid #000;
+			height: 100px;
+		}
+	</style>
+</head>
+<body>
+	<div id="app"></div>
+
+	<script type="text/javascript">
+
+		// 路由meta元数据，对于路由规则是否需要验证权限的配置
+		// 在路由对象中和name同级 { meta: { isCheck: true } }
+		// 路由钩子，权限控制的函数执行时期
+		// router.beforeEach(function(to, from, next){}) 每次路由匹配后，渲染到router-view之前
+
+		let isLogin = false; // 是否登录
+
+
+		// $route 路由跳转信息对象，只读对象
+		// $router 路由操作对象，只写对象
+		let Login = {
+			template: `
+				<div>我是登录页面</div>
+			`,
+			created: function(){
+				// console.log(this.$route.query)
+				// console.log(this.$route.params)
+				console.log('登录成功')
+				isLogin = true;
+			}
+		}
+		let Register = {
+			template: `
+				<div>我是注册页面</div>
+			`
+		}
+		// 登录后才能看到
+		let MainPage = {
+			template: `
+				<div>
+					我是主体页面
+					<router-link to="/main/video">主页的视频视图</router-link>
+					<router-link to="/main/music">主页的音乐视图</router-link>
+					<router-view name="main.video"></router-view>
+					<router-view></router-view>
+				</div>
+			`
+		}
+		let MainPageVideo = {
+			template: `
+				<div>我是主体页面内的Video</div>
+			`
+		}
+		let MainPageMusic = {
+			template: `
+				<div>我是主体页面内的Music</div>
+			`
+		}
+		// 2.安装插件，目的：
+		Vue.use(VueRouter); 
+		// VueRouter中返回一个install方法：VueRouter.install = fn(Vue) 这个方法需要接受Vue
+		// 那么可以大致猜到Vue的use方法为：use: function(plugin){ plugin.install(Vue) }
+
+		// 3.创建一个路由对象
+		// console.log(VueRouter);
+		let router = new VueRouter({
+			// 4.配置路由对象
+			routes: [{
+				// login 改为 my-login
+				// 路由对象有了名称就等于有了变量名，router-link只需说明这个变量名就可以指向url
+				name: 'login', path: '/my-login/:id?', component: Login
+			}, {
+				path: '/register', component: Register
+			}, {
+				// 保证 /main 显示main组件
+				name: 'main', 
+				path: '/main', 
+				component: MainPage,
+				children: [{
+					// 保证 /main/video 额外显示video组件
+					name: 'main.video',
+					path: 'video', // 如果是 /video 就是以根目录显示，但还是会显示父路由的内容
+					component: MainPageVideo
+				}, {
+					name: 'main.music',
+					path: 'music',
+					component: MainPageMusic
+				}],
+				// 给未来路由的权限控制，路由守卫
+				meta: {
+					isCheck: true,
+				}
+			}]
+		});
+
+		router.beforeEach(function(to, from, next){
+			// console.log(to, from);
+			if(to.name === 'login'){
+				next(); // 放行
+			}
+			else{
+				if(isLogin){
+					next();
+				}
+				else if(to.meta.isCheck){
+					console.log('无权限，请先登录')
+					next({ name: 'login' }); // 重定向
+				}
+				next(false); // 取消用户导航行为，相当于什么都没发生
+				
+			}
+			// next(); // 不调用next就会卡住，不继续执行（渲染）
+		});
+
+		// 6.指定路由改变局部变量的位置
+		let App = {
+			components: {
+			},
+			template: `
+				<div>
+					<router-link to="/main">主页</router-link>
+					<router-link :to="{ name: 'login', query: { id: 1 } }">登录query</router-link>
+					<router-link to="/register">注册</router-link>
+					<hr />
+					<router-view></router-view>
+				</div>
+			`,
+			data(){
+				return {
+					isShow: false,
+				}
+			},
+			mounted: function(){
+				console.log(this.$refs['myBtn'])
+			},
+
+		}
+		// 5.将配置好的路由对象关联到vue实例中
+		new Vue({
+			el: '#app',
+			components: {
+				app: App
+			},
+			template: `<app/>`,
+			router: router, // 不加这一步会导致运行的时候报错，undefined对象中取不到matched
+		})
+	</script>
+</body>
+</html>

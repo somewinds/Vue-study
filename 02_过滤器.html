@@ -1,0 +1,102 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+</head>
+<body>
+	<div id="app"></div>
+
+	<script type="text/javascript">
+		// 过滤器，改变数据的显示，即对数据显示添油加醋
+		// 原本数据显示 abc，使用过滤器显示为 cba
+
+
+		// 注册公用的全局组件my-button，省去很多的components: { xxx: Xxx }
+		Vue.filter('comReverse', function(dataStr){
+			return dataStr.split('').reverse().join('');
+		});
+
+		
+		let App = {
+			components: {
+			},
+			filters: {
+				// 参数1就是传递的元数据
+				/**
+				 * [reverse description]
+				 * @param  {[type]} dataStr [传递的元数据]
+				 * @return {[type]} lang    [第二个参数]
+				 */
+				reverse(dataStr, lang){
+					// return 就是显示的内容
+					// return '固定字符串';
+					//             转数数组  反转      转字符串
+					return lang + dataStr.split('').reverse().join('');
+				}
+			},
+			template: `
+				<div>
+					<input type="text" v-model="text" />
+					{{ text | reverse('￥') }}
+					<input type="text" v-model="obj.name" />
+
+					<div>
+						<input type="text" v-model="n1" />
+						+
+						<input type="text" v-model="n2" />
+						+
+						<input type="text" v-model="n3" />
+						=
+						<span>{{ sum }}</span>
+					</div>
+				</div>
+			`,
+			data(){
+				return {
+					text: '',
+					obj: {
+						id: 1,
+						name: '张三'
+					},
+					n1: 0,
+					n2: 0,
+					n3: 0,
+				}
+			},
+			watch: {
+				// 普通监视
+				text: function(newV, oldV){
+					console.log(newV, oldV);
+				},
+				// 监视对象，该表内部属性的值，不会被监视到，因为改变的是对象的地址，地址没改，改的是内部的值
+				obj: function(newV, oldV){
+					console.log(newV, oldV);
+				},
+				obj: {
+					deep: true, // 深度监视
+					handler: function(value, oldValue){
+						console.log('监视成功');
+					}
+				}
+			},
+			computed: {
+				// 包含原值不变，缓存不调函数的优化机制
+				sum: function(){
+					console.log('触发computed')
+					return this.n1 + this.n2 + this.n3
+				}
+			}
+
+		}
+
+		new Vue({
+			el: '#app',
+			components: {
+				app: App
+			},
+			template: `<app/>`
+		})
+	</script>
+</body>
+</html>

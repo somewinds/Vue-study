@@ -1,0 +1,56 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+</head>
+<body>
+	<div id="app"></div>
+
+	<script type="text/javascript">
+
+		// 注册公用的全局组件my-button，省去很多的components: { xxx: Xxx }
+		Vue.component('my-btn', {
+			template: `<button style='color: blue'>这是公用的按钮</button>`
+		});
+
+		let MyHeader = {
+			template: `
+				<div>
+					<h1>我是头部</h1>
+					<my-btn/>
+				</div>
+			`
+		}
+		let MyBody = {
+			template: `
+				<div>
+					<h1>我是主体</h1>
+					<my-btn/>
+				</div>
+			`
+		}
+		let App = {
+			components: {
+				'my-header': MyHeader,
+				'my-body': MyBody
+			},
+			template: `
+				<div>
+					<my-btn></my-btn>
+					<my-header></my-header>
+					<my-body></my-body>
+				</div>
+			`
+		}
+
+		new Vue({
+			el: '#app',
+			components: {
+				app: App
+			},
+			template: `<app/>`
+		})
+	</script>
+</body>
+</html>

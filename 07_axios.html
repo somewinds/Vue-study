@@ -1,0 +1,54 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+	<!-- 引入vue-router（核心插件）对象 -->
+	<script src="https://unpkg.com/vue-router@2.0.0/dist/vue-router.js"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+	<div id="app"></div>
+
+	<script type="text/javascript">
+
+		
+		let App = {
+			components: {
+			},
+			template: `
+				<div>
+					<button @click="sendAjax">发请求</button>
+					<input type="text" v-model="text" />
+				</div>
+			`,
+			data(){
+				return {
+					text: '',
+				}
+			},
+			methods: {
+				sendAjax(){
+					// 让组件具备axios对象的引用
+					console.log(this.$axios)
+
+				},
+			}
+
+		}
+
+		// 挂载axios到this上
+		// 组件内的每一个this对象都是Vue的孩子
+		// 那么，Vue祖宗的原型数据，就会共享给所有的孩子
+		Vue.prototype.$axios = axios;
+
+		new Vue({
+			el: '#app',
+			components: {
+				app: App
+			},
+			template: `<app/>`
+		})
+	</script>
+</body>
+</html>
