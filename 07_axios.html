@@ -18,24 +18,95 @@
 			},
 			template: `
 				<div>
+					<input type="text" v-model="account" placeholder="用户名" />
+					<input type="text" v-model="password" placeholder="密码" />
+					<hr />
+					<div>
+						<button @click="postLogin">登录</button>
+					</div>
 					<button @click="sendAjax">发请求</button>
+					<button @click="getCommunities">getCommunities</button>
+					<button @click="getFinance">getFinance</button>
 					<input type="text" v-model="text" />
+					<hr />
+					<ul>
+						<li v-for="(item, index) in data_items" :key="index">
+							{{ item.name }}
+						</li>
+					</ul>
 				</div>
 			`,
 			data(){
 				return {
+					account: 'admin',
+					password: '',
 					text: '',
+					data_items: []
 				}
 			},
 			methods: {
 				sendAjax(){
 					// 让组件具备axios对象的引用
-					console.log(this.$axios)
+					// console.log(this.$axios);
+					// console.log(axios.defaults.headers['Authorization'])
+					
+					this.getCommunities();
 
+					this.getFinance();
+
+				},
+				postLogin(){
+					axios.post('http://lanhanba.net/api/inner/login', {
+							account: this.account,
+							password: this.password,
+						}).then(function(res) {
+							console.log(res);
+							localStorage['apikey'] = res.data.result.apikey;
+						}).catch(function(err) {
+							console.log(err);
+						});
+				},
+				getCommunities(){
+					axios.get('/inner/communities', {
+						// 在传递给 then/catch 前，允许修改响应数据
+						transformResponse: function(data){
+							data = JSON.parse(data);
+							console.log(data)
+							let result = [];
+							if(data.result && data.result.data){
+								result = data.result.data.map(item => ({
+									id: item.id,
+									name: item.name
+								}));
+							}
+							return result;
+						}
+					}).then(function(res) {
+						console.log(res);
+						if(res.data){
+							this.data_items = res.data;
+							console.log(this.data_items)
+						}
+					}).catch(function(err) {
+						console.log(err);
+					});
+				},
+				getFinance(){
+					axios.get('/inner/undone-tasks/finance').then(function(res) {
+							console.log(res);
+						}).catch(function(err) {
+							console.log(err);
+						});
 				},
 			}
 
 		}
+
+		// 配置公共数据
+		axios.defaults.baseURL = 'http://lanhanba.net/api/';
+		axios.defaults.headers['x-client'] = 'bc';
+		axios.defaults.headers['x-client-version'] = '3.8';
+		axios.defaults.headers['Authorization'] = 'bearer' + localStorage['apikey'];
 
 		// 挂载axios到this上
 		// 组件内的每一个this对象都是Vue的孩子
